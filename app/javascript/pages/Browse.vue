@@ -7,6 +7,13 @@
       </p>
     </div>
 
+    <madlibs
+      :contributions="contributions"
+      :filterTypes="filterTypes"
+      :initialFilters="initialFilters"
+      v-model="activeFilters"
+    />
+
     <section class="section columns">
       <section class="column is-one-quarter">
         <BrowserSelector :browser="browser" @clicked="browser = $event" />
@@ -20,16 +27,19 @@
 
 <script>
 import BrowserSelector from './browse/BrowserSelector'
+import Madlibs from './browse/Madlibs'
 import Filters from './browse/Filters'
 import ListBrowser from './browse/ListBrowser'
 import TileBrowser from './browse/TileBrowser'
 import ContributionFetcher from './browse/ContributionFetcher'
+
 
 export default {
   components: {
     BrowserSelector,
     Filters,
     ListBrowser,
+    Madlibs,
     TileBrowser,
   },
   props: {
@@ -61,6 +71,9 @@ export default {
     activeFilters: 'updateContributions',
   },
   methods: {
+    flashIfError(e) {
+      console.log(e)
+    },
     updateContributions() {
       if (this.activeFilters == this.initialFilters) {
         return (this.activeContributions = this.contributions)
@@ -70,9 +83,6 @@ export default {
         if (result.error) this.flashIfError(result.error)
       })
     },
-    flashIfError(e) {
-      console.log(e)
-    },
-  },
+  }
 }
 </script>

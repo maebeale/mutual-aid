@@ -1,11 +1,15 @@
-import {mount, shallowMount} from '@vue/test-utils'
+import {createLocalVue, mount, shallowMount} from '@vue/test-utils'
+import {configure} from 'vue_config'
 import Browse from 'pages/Browse.vue'
 import ListBrowser from 'pages/browse/ListBrowser'
 import TileBrowser from 'pages/browse/TileBrowser'
 import Filters from 'pages/browse/Filters'
+import Madlibs from 'pages/browse/Madlibs'
 
 describe('Browse', () => {
-  def('wrapper', () => mount(Browse))
+  def('wrapper', () => mount(Browse, {
+    localVue: configure(createLocalVue())
+  }))
 
   describe('browser view', () => {
     def('showTilesButton', () => $wrapper.find('button#show-tiles'))
@@ -41,6 +45,20 @@ describe('Browse', () => {
       it('disables the List view button', () => {
         assert.equal($showListButton.attributes('disabled'), 'disabled')
         assert.notExists($showTilesButton.attributes('disabled'))
+      })
+    })
+  })
+
+  describe("Mablibs filtering", () => {
+    def('madlibsTypeDropdown', () => $wrapper.find('select#madlibs-type'))
+
+    describe('when changing the type dropdown', () => {
+      beforeEach(async () => {
+
+      })
+  
+      it("updates the checkboxes when making a dropdown selection", () => {
+
       })
     })
   })

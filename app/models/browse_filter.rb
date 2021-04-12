@@ -18,7 +18,7 @@ class BrowseFilter
   attr_reader :parameters
 
   def self.filter_groupings_json
-    FILTER_CLASSES.map(&:filter_grouping).to_json
+    FilterGroupBlueprint.render(FILTER_CLASSES)
   end
 
   def initialize(parameters)

@@ -52,10 +52,6 @@ RSpec.configure do |config|
   config.include Devise::Test::ControllerHelpers, type: :view
   config.include Warden::Test::Helpers
 
-  config.expect_with :rspec do |c|
-    c.syntax = :expect
-  end
-
   # RSpec Rails can automatically mix in different behaviours to your tests
   # based on their file location, for example enabling you to call `get` and
   # `post` in specs under `spec/controllers`.
@@ -79,5 +75,13 @@ RSpec.configure do |config|
   # https://github.com/wardencommunity/warden/wiki/Testing#requirements
   config.after type: :request do
     Warden.test_reset!
+  end
+
+  # exclude system specs unless they are the only ones specified
+  config.filter_run_excluding(type: :system) unless config.files_to_run.all? %r{/spec/system}
+
+  config.before(:example, type: :system) do
+    # set HEADLESS_CHROME in .env.test.local or when running rspec: HEADLESS_CHROME=true bin/rspec spec/system
+    driven_by(:selenium_chrome_headless) if ENV['HEADLESS_CHROME'] == 'true' # FIXME: use .to_boolean once merged
   end
 end

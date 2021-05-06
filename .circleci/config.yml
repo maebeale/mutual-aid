@@ -87,49 +87,47 @@ commands:
             bundle exec rails webpacker:compile
             bundle exec rspec --format progress --format RspecJunitFormatter -o /tmp/rspec_system/rspec.xml spec/system
 
-app_image: &app_image
-  image: circleci/ruby:2.7.2-node-browsers
-db_image: &db_image
-  image: circleci/postgres:latest
+executors:
+  app_only:
+    docker:
+      - image: circleci/ruby:2.7.2-node
+  app_and_db:
+    docker:
+      - image: circleci/ruby:2.7.2-node-browsers
+        environment:
+          POSTGRES_HOST: 127.0.0.1
+          RAILS_ENV: test
+      - image: circleci/postgres:latest
+        environment:
+          POSTGRES_DB: mutualaid_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_USER: circleci
 
 jobs:
   bundle:
-    docker:
-      - <<: *app_image
+    executor: app_only
     steps:
       - checkout
       - bundle_install
   yarn:
-    docker:
-      - <<: *app_image
+    executor: app_only
     steps:
       - checkout
       - yarn_install
   rubocop:
-    docker:
-      - <<: *app_image
+    executor: app_only
     steps:
       - checkout
       - run_rubocop
   backend_specs:
-    docker:
-      - <<: *app_image
-        environment:
-          RAILS_ENV: test
-          POSTGRES_HOST: 127.0.0.1
-      - <<: *db_image
-        environment:
-          POSTGRES_USER: circleci
-          POSTGRES_DB: mutualaid_test
-          POSTGRES_HOST_AUTH_METHOD: trust
+    executor: app_and_db
     steps:
       - checkout
       - rspec_backend
       - store_test_results:
           path: /tmp/rspec_backend
   frontend_specs:
-    docker:
-      - <<: *app_image
+    executor: app_only
     steps:
       - checkout
       - mocha_specs
@@ -138,17 +136,9 @@ jobs:
       - store_artifacts:
           path: /tmp/frontend
   system_specs:
-    docker:
-      - <<: *app_image
-        environment:
-          RAILS_ENV: test
-          POSTGRES_HOST: 127.0.0.1
-          HEADLESS_CHROME: true
-      - <<: *db_image
-        environment:
-          POSTGRES_USER: circleci
-          POSTGRES_DB: mutualaid_test
-          POSTGRES_HOST_AUTH_METHOD: trust
+    executor: app_and_db
+    environment:
+      HEADLESS_CHROME: true
     steps:
       - checkout
       - rspec_system

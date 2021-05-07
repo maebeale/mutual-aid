@@ -33,9 +33,6 @@ commands:
   run_rubocop:
     description: 'Run rubocop'
     steps:
-      - restore_cache:
-          keys:
-            - bundler-cache-{{ checksum ".ruby-version" }}-{{ checksum "Gemfile.lock" }}
       - run:
           name: 'Run rubocop'
           command: |
@@ -45,12 +42,6 @@ commands:
   rspec_backend:
     description: 'Run rspec backend specs'
     steps:
-      - restore_cache:
-          keys:
-            - bundler-cache-{{ checksum ".ruby-version" }}-{{ checksum "Gemfile.lock" }}
-      - restore_cache:
-          keys:
-            - node-cache-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
       - run:
           name: 'Run rspec backend specs'
           command: |
@@ -61,9 +52,6 @@ commands:
   mocha_specs:
     description: 'Run mocha specs'
     steps:
-      - restore_cache:
-          keys:
-            - node-cache-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
       - run:
           name: 'Run mocha specs'
           command: yarn test --reporter mocha-junit-reporter
@@ -72,12 +60,6 @@ commands:
   rspec_system:
     description: 'Run rspec system specs'
     steps:
-      - restore_cache:
-          keys:
-            - bundler-cache-{{ checksum ".ruby-version" }}-{{ checksum "Gemfile.lock" }}
-      - restore_cache:
-          keys:
-            - node-cache-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
       - run:
           name: 'Run rspec system specs'
           command: |
@@ -109,41 +91,47 @@ jobs:
     steps:
       - checkout
       - bundle_install
+      - persist_to_workspace:
+          root: .
+          paths: [.bundle]
   yarn:
     executor: app_only
     steps:
       - checkout
       - yarn_install
+      - persist_to_workspace:
+          root: .
+          paths: [node_modules]
   rubocop:
     executor: app_only
     steps:
       - checkout
+      - attach_workspace: {at: .}
       - run_rubocop
   backend_specs:
     executor: app_and_db
     steps:
       - checkout
+      - attach_workspace: {at: .}
       - rspec_backend
-      - store_test_results:
-          path: /tmp/rspec_backend
+      - store_test_results: {path: /tmp/rspec_backend}
   frontend_specs:
     executor: app_only
     steps:
       - checkout
+      - attach_workspace: {at: .}
       - mocha_specs
-      - store_test_results:
-          path: /tmp/frontend
-      - store_artifacts:
-          path: /tmp/frontend
+      - store_test_results: {path: /tmp/frontend}
+      - store_artifacts: {path: /tmp/frontend}
   system_specs:
     executor: app_and_db
     environment:
       HEADLESS_CHROME: true
     steps:
       - checkout
+      - attach_workspace: {at: .}
       - rspec_system
-      - store_test_results:
-          path: /tmp/rspec_system
+      - store_test_results: {path: /tmp/rspec_system}
 
 workflows:
   version: 2.1

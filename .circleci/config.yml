@@ -47,16 +47,22 @@ commands:
             set -euxo pipefail
             bundle config path .bundle
             bundle exec rubocop
-  rspec_backend:
-    description: 'Run rspec backend specs'
+  rspec:
+    parameters:
+      specs:
+        type: string
+        default: spec
+      output:
+        type: string
+        default: /tmp/rspec/rspec.xml
     steps:
       - run:
-          name: 'Run rspec backend specs'
+          name: 'Run rspec'
           command: |
             set -euxo pipefail
             bundle config path .bundle
             bundle exec rails db:create
-            bundle exec rspec --format progress --format RspecJunitFormatter -o /tmp/rspec_backend/rspec.xml
+            bundle exec rspec --format progress --format RspecJunitFormatter -o << parameters.output >> << parameters.specs >>
   mocha_specs:
     description: 'Run mocha specs'
     steps:
@@ -65,16 +71,6 @@ commands:
           command: yarn test --reporter mocha-junit-reporter
           environment:
             MOCHA_FILE: /tmp/frontend/test-results.xml
-  rspec_system:
-    description: 'Run rspec system specs'
-    steps:
-      - run:
-          name: 'Run rspec system specs'
-          command: |
-            set -euxo pipefail
-            bundle config path .bundle
-            bundle exec rails db:create
-            bundle exec rspec --format progress --format RspecJunitFormatter -o /tmp/rspec_system/rspec.xml spec/system
 
 executors:
   app_only:
@@ -131,7 +127,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace: {at: .}
-      - rspec_backend
+      - rspec: {output: /tmp/rspec_backend/rspec.xml}
       - store_test_results: {path: /tmp/rspec_backend}
   frontend_specs:
     executor: app_only
@@ -148,7 +144,9 @@ jobs:
     steps:
       - checkout
       - attach_workspace: {at: .}
-      - rspec_system
+      - rspec:
+          specs: spec/system
+          output: /tmp/rspec_system/rspec.xml
       - store_test_results: {path: /tmp/rspec_system}
 
 workflows:

@@ -30,6 +30,14 @@ commands:
           key: node-cache-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
           paths:
             - node_modules
+  webpacker_compile:
+    steps:
+      - run:
+          name: 'Compile webpacker assets'
+          command: |
+            set -euxo pipefail
+            bundle config path .bundle
+            bundle exec rails webpacker:compile
   run_rubocop:
     description: 'Run rubocop'
     steps:
@@ -66,7 +74,6 @@ commands:
             set -euxo pipefail
             bundle config path .bundle
             bundle exec rails db:create
-            bundle exec rails webpacker:compile
             bundle exec rspec --format progress --format RspecJunitFormatter -o /tmp/rspec_system/rspec.xml spec/system
 
 executors:
@@ -102,6 +109,17 @@ jobs:
       - persist_to_workspace:
           root: .
           paths: [node_modules]
+  webpacker:
+    executor: app_only
+    environment:
+      RAILS_ENV: test
+    steps:
+      - checkout
+      - attach_workspace: {at: .}
+      - webpacker_compile
+      - persist_to_workspace:
+          root: .
+          paths: [public/packs-test]
   rubocop:
     executor: app_only
     steps:
@@ -149,7 +167,12 @@ workflows:
       - frontend_specs:
           requires:
             - yarn
+      - webpacker:
+          requires:
+            - bundle
+            - yarn
       - system_specs:
           requires:
             - bundle
             - yarn
+            - webpacker

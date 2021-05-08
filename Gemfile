@@ -46,9 +46,10 @@ group :development, :test do
 end
 
 group :test do
-  # an XML formatter is required for fancier CircleCI results
-  gem 'rspec_junit_formatter'
+  gem 'capybara'
   gem 'pundit-matchers'
+  gem 'rspec_junit_formatter' # an XML formatter is required for fancier CircleCI results
+  gem 'selenium-webdriver'
 end
 
 group :development do

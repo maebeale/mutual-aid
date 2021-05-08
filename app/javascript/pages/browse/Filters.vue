@@ -32,7 +32,7 @@
           >
             Select all
           </b-checkbox>
-          <ul class="mt-1">
+          <ul class="mt-1 test-2">
             <li v-for="filter of type.filters" :key="filter.id">
               <b-checkbox
                 :native-value="filter.id"

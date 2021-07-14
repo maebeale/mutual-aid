@@ -1,5 +1,110 @@
 version: 2.1
 
+workflows:
+  version: 2.1
+  test:
+    jobs:
+      - bundle
+      - yarn
+      - rubocop:
+          requires:
+            - bundle
+      - webpacker:
+          requires:
+            - bundle
+            - yarn
+      - frontend_specs:
+          requires:
+            - yarn
+      - backend_specs:
+          requires:
+            - bundle
+            - yarn
+      - system_specs:
+          requires:
+            - bundle
+            - yarn
+            - webpacker
+
+executors:
+  app_only:
+    shell: /bin/bash -euxo pipefail
+    docker:
+      - image: circleci/ruby:2.7.2-node
+  app_and_db:
+    shell: /bin/bash -euxo pipefail
+    docker:
+      - image: circleci/ruby:2.7.2-node-browsers
+        environment:
+          POSTGRES_HOST: 127.0.0.1
+          RAILS_ENV: test
+      - image: circleci/postgres:latest
+        environment:
+          POSTGRES_DB: mutualaid_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_USER: circleci
+
+jobs:
+  bundle:
+    executor: app_only
+    steps:
+      - checkout
+      - bundle_install_cmd
+      - persist_to_workspace:
+          root: .
+          paths: [.bundle]
+  yarn:
+    executor: app_only
+    steps:
+      - checkout
+      - yarn_install_cmd
+      - persist_to_workspace:
+          root: .
+          paths: [node_modules]
+  rubocop:
+    executor: app_only
+    steps:
+      - checkout
+      - attach_workspace: {at: .}
+      - rubocop_cmd
+  webpacker:
+    executor: app_only
+    environment:
+      RAILS_ENV: test
+    steps:
+      - checkout
+      - attach_workspace: {at: .}
+      - webpacker_compile_cmd
+      - persist_to_workspace:
+          root: .
+          paths: [public/packs-test]
+  frontend_specs:
+    executor: app_only
+    steps:
+      - checkout
+      - attach_workspace: {at: .}
+      - mocha_cmd: {output: /tmp/mocha/mocha.xml}
+      - store_test_results: {path: /tmp/mocha}
+      - store_artifacts: {path: /tmp/mocha}
+  backend_specs:
+    executor: app_and_db
+    steps:
+      - checkout
+      - attach_workspace: {at: .}
+      - rspec_cmd: {output: /tmp/rspec_backend/rspec.xml}
+      - store_test_results: {path: /tmp/rspec_backend}
+  system_specs:
+    executor: app_and_db
+    environment:
+      HEADLESS_CHROME: true
+    steps:
+      - checkout
+      - attach_workspace: {at: .}
+      - rspec_cmd:
+          specs: spec/system
+          output: /tmp/rspec_system/rspec.xml
+      - store_test_results: {path: /tmp/rspec_system}
+
 commands:
   bundle_install_cmd:
     description: 'Perform bundler installation, relying on CircleCI cache for performance'
@@ -83,108 +188,3 @@ commands:
           command: yarn test --reporter mocha-junit-reporter
           environment:
             MOCHA_FILE: << parameters.output >>
-
-executors:
-  app_only:
-    shell: /bin/bash -euxo pipefail
-    docker:
-      - image: circleci/ruby:2.7.2-node
-  app_and_db:
-    shell: /bin/bash -euxo pipefail
-    docker:
-      - image: circleci/ruby:2.7.2-node-browsers
-        environment:
-          POSTGRES_HOST: 127.0.0.1
-          RAILS_ENV: test
-      - image: circleci/postgres:latest
-        environment:
-          POSTGRES_DB: mutualaid_test
-          POSTGRES_HOST_AUTH_METHOD: trust
-          POSTGRES_USER: circleci
-
-jobs:
-  bundle:
-    executor: app_only
-    steps:
-      - checkout
-      - bundle_install_cmd
-      - persist_to_workspace:
-          root: .
-          paths: [.bundle]
-  yarn:
-    executor: app_only
-    steps:
-      - checkout
-      - yarn_install_cmd
-      - persist_to_workspace:
-          root: .
-          paths: [node_modules]
-  webpacker:
-    executor: app_only
-    environment:
-      RAILS_ENV: test
-    steps:
-      - checkout
-      - attach_workspace: {at: .}
-      - webpacker_compile_cmd
-      - persist_to_workspace:
-          root: .
-          paths: [public/packs-test]
-  rubocop:
-    executor: app_only
-    steps:
-      - checkout
-      - attach_workspace: {at: .}
-      - rubocop_cmd
-  backend_specs:
-    executor: app_and_db
-    steps:
-      - checkout
-      - attach_workspace: {at: .}
-      - rspec_cmd: {output: /tmp/rspec_backend/rspec.xml}
-      - store_test_results: {path: /tmp/rspec_backend}
-  frontend_specs:
-    executor: app_only
-    steps:
-      - checkout
-      - attach_workspace: {at: .}
-      - mocha_cmd: {output: /tmp/mocha/mocha.xml}
-      - store_test_results: {path: /tmp/mocha}
-      - store_artifacts: {path: /tmp/mocha}
-  system_specs:
-    executor: app_and_db
-    environment:
-      HEADLESS_CHROME: true
-    steps:
-      - checkout
-      - attach_workspace: {at: .}
-      - rspec_cmd:
-          specs: spec/system
-          output: /tmp/rspec_system/rspec.xml
-      - store_test_results: {path: /tmp/rspec_system}
-
-workflows:
-  version: 2.1
-  mutual_aid:
-    jobs:
-      - bundle
-      - yarn
-      - rubocop:
-          requires:
-            - bundle
-      - backend_specs:
-          requires:
-            - bundle
-            - yarn
-      - frontend_specs:
-          requires:
-            - yarn
-      - webpacker:
-          requires:
-            - bundle
-            - yarn
-      - system_specs:
-          requires:
-            - bundle
-            - yarn
-            - webpacker

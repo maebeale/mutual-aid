@@ -14,7 +14,7 @@ class Shift < ApplicationRecord
     "#{team&.name}: #{times} #{"(" + person.name + ")" if person_id}"
   end
 
-  def times
+  def times # rubocop:todo Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity, Metrics/AbcSize
     hide_starting_p = started_at&.strftime('%p') == ended_at&.strftime('%p')
     "#{started_at&.strftime("%a at %l:%M")} #{started_at&.strftime("%P") unless hide_starting_p} - #{ended_at&.strftime("%l:%M %P") || ("TBD" if started_at.present?)}#{started_at&.strftime(", %B %d %Y")}"
   end

@@ -6,68 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 32
-# Configuration parameters: IgnoredMethods, CountRepeatedAttributes.
-Metrics/AbcSize:
-  Max: 62
-
-# Offense count: 54
-# Configuration parameters: CountComments, CountAsOne, ExcludedMethods, IgnoredMethods.
-# IgnoredMethods: refine
-Metrics/BlockLength:
-  Max: 249
-
-# Offense count: 2
-# Configuration parameters: CountComments, Max, CountAsOne.
-Metrics/ClassLength:
-  Exclude:
-    - 'app/models/importers/base_importer.rb'
-    - 'app/models/importers/submission_response_importer.rb'
-
-# Offense count: 15
-# Configuration parameters: IgnoredMethods, Max.
-Metrics/CyclomaticComplexity:
-  Exclude:
-    - 'app/controllers/listings_controller.rb'
-    - 'app/controllers/locations_controller.rb'
-    - 'app/controllers/matches_controller.rb'
-    - 'app/helpers/application_helper.rb'
-    - 'app/mailers/submission_mailer.rb'
-    - 'app/models/importers/base_importer.rb'
-    - 'app/models/importers/submission_response_importer.rb'
-    - 'app/models/shift.rb'
-    - 'db/migrate/20200510043917_add_missing_indexes_on_taggings.acts_as_taggable_on_engine.rb'
-
-# Offense count: 65
-# Configuration parameters: CountComments, CountAsOne, ExcludedMethods, IgnoredMethods.
-Metrics/MethodLength:
-  Max: 30
-
-# Offense count: 1
-# Configuration parameters: CountComments, Max, CountAsOne.
-Metrics/ModuleLength:
-  Exclude:
-    - 'app/helpers/communication_log_buttons.rb'
-
-# Offense count: 8
-# Configuration parameters: Max, CountKeywordArgs, MaxOptionalParameters.
-Metrics/ParameterLists:
-  Exclude:
-    - 'app/helpers/application_helper.rb'
-    - 'app/helpers/communication_log_buttons.rb'
-
-# Offense count: 13
-# Configuration parameters: IgnoredMethods, Max.
-Metrics/PerceivedComplexity:
-  Exclude:
-    - 'app/controllers/listings_controller.rb'
-    - 'app/controllers/locations_controller.rb'
-    - 'app/controllers/matches_controller.rb'
-    - 'app/mailers/submission_mailer.rb'
-    - 'app/models/importers/base_importer.rb'
-    - 'app/models/importers/submission_response_importer.rb'
-    - 'app/models/shift.rb'
-
 # Offense count: 7
 # Cop supports --auto-correct.
 Security/YAMLLoad:

@@ -7,7 +7,7 @@ require 'csv'
 # would also require removing the rescue blocks; otherwise they would swallow errors.
 # Leaving this as a todo to be cleaned up.
 
-class Importers::BaseImporter
+class Importers::BaseImporter # rubocop:todo Metrics/ClassLength
   attr_accessor :row_count, :new_records_count, :dupe_records_count, :row_success_count, :row_error_count
 
   def initialize(current_user)
@@ -66,7 +66,7 @@ class Importers::BaseImporter
     row['to_import'] && row['to_import'].downcase == 'n'
   end
 
-  def row_processing_requirement(row)
+  def row_processing_requirement(row) # rubocop:todo Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity, Metrics/AbcSize, Metrics/MethodLength
     results = []
     required_fields_array.map do |rr|
       if rr.instance_of?(Array)
@@ -125,7 +125,7 @@ class Importers::BaseImporter
     import_rows(rows)
   end
 
-  def import_rows(rows)
+  def import_rows(rows) # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
     process_headers_as_data(rows)
 
     ActiveRecord::Base.transaction do
@@ -161,7 +161,7 @@ class Importers::BaseImporter
     {}
   end
 
-  def records_report(status)
+  def records_report(status) # rubocop:todo Metrics/MethodLength
     if status == 'initial'
       initial_model_counts
     end
@@ -178,7 +178,7 @@ class Importers::BaseImporter
     @counts_hash
   end
 
-  def initial_model_counts
+  def initial_model_counts # rubocop:todo Metrics/MethodLength
     logs = []
     initial_counts_hash = {}
     @klasses_array.compact.each do |klass|
@@ -194,7 +194,7 @@ class Importers::BaseImporter
     @initial_model_counts = initial_counts_hash
   end
 
-  def final_diff_model_counts
+  def final_diff_model_counts # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
     final_logs = []
     diff_logs = []
     final_counts_hash = {}
@@ -244,7 +244,7 @@ class Importers::BaseImporter
     " +++ name: #{row["name"]}" ### can be overwritten at class level
   end
 
-  def destroy_records(today_only: false)
+  def destroy_records(today_only: false) # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
     ActiveRecord::Base.transaction do
       @klasses_array.each do |model|
         if model == Person
@@ -269,7 +269,7 @@ class Importers::BaseImporter
   end
 end
 
-def parse_date(date_string)
+def parse_date(date_string) # rubocop:todo Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity, Metrics/AbcSize, Metrics/MethodLength
   date = nil
   if date_string&.include?('/')
     m, d, y = date_string.split('/')

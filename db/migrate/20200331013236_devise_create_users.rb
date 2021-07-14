@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class DeviseCreateUsers < ActiveRecord::Migration[6.0]
-  def change
+  def change # rubocop:disable Metrics/AbcSize
     create_table :users do |t|
       ## Database authenticatable
       t.string :email,              null: false, default: ""

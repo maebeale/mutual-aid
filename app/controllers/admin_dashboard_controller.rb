@@ -1,5 +1,5 @@
 class AdminDashboardController < AdminController
-  def show
+  def show # rubocop:todo Metrics/AbcSize
     @submission_count = Submission.count
     @match_count = Match.any? ? Match.pluck(:receiver_id).uniq.length : 1
     @ask_count = Ask.any? ? Ask.all.length : 1

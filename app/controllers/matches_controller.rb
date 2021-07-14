@@ -3,7 +3,7 @@
 class MatchesController < AdminController
   before_action :set_match, only: %i[edit update destroy]
 
-  def index
+  def index # rubocop:todo Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity, Metrics/AbcSize, Metrics/MethodLength
     @matches = Match.status(params[:status] || 'all').order(updated_at: :desc)
 
     # follow_up_status filter
@@ -38,7 +38,7 @@ class MatchesController < AdminController
     set_form_dropdowns
   end
 
-  def create
+  def create # rubocop:todo Metrics/MethodLength
     @match = Match.new(match_params)
 
     if @match.save
@@ -54,7 +54,7 @@ class MatchesController < AdminController
     end
   end
 
-  def update
+  def update # rubocop:todo Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity, Metrics/AbcSize, Metrics/MethodLength
     save_and_continue = params[:commit]&.downcase&.include?('save and view match')
     update_connections = params[:commit]&.downcase&.include?('edit who this match connects')
     if @match.update(match_params)
@@ -83,7 +83,7 @@ class MatchesController < AdminController
     @match = Match.find(params[:id])
   end
 
-  def set_form_dropdowns
+  def set_form_dropdowns # rubocop:todo Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity, Metrics/AbcSize, Metrics/MethodLength
     type = params['receiver_id'].present? ? 'Ask' : 'Offer' # TODO: change w resources
     if type == 'Ask'
       @receiver = Listing.where(type: type, id: params[:receiver_id]).first

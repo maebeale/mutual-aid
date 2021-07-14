@@ -9,10 +9,7 @@ class ListingConverter
 
       remaining_tag_sets.map do |tag_set|
         listing.dup.tap do |new_listing|
-          new_listing.update!(
-            tag_list: tag_set,
-            created_at: listing.created_at
-          )
+          new_listing.update!(tag_list: tag_set, created_at: listing.created_at)
         end
       end
     end

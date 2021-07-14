@@ -14,7 +14,8 @@ RSpec.describe ContributionBlueprint do
     )
   end
   let(:expected_contact_method) { contribution.person.preferred_contact_method }
-  it 'returns reasonable data by default' do
+
+  it 'returns reasonable data by default' do # rubocop:todo Metrics/BlockLength
     expected_area_name = Faker::Address.community
     contribution.service_area.name = expected_area_name
     contribution.service_area.save!

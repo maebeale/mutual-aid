@@ -21,7 +21,7 @@ class CommunicationLogsController < AdminController
     set_form_dropdowns
   end
 
-  def create
+  def create # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
     @communication_log = CommunicationLog.new(communication_log_params)
 
     if @communication_log.save
@@ -48,7 +48,7 @@ class CommunicationLogsController < AdminController
     end
   end
 
-  def update
+  def update # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
     if @communication_log.update(communication_log_params)
       if params[:commit]&.include?('Save and go to Match')
         redirect_to edit_match_path(@communication_log.match), notice: 'Communication log was successfully updated.'
@@ -74,7 +74,7 @@ class CommunicationLogsController < AdminController
     @communication_log = CommunicationLog.find(params[:id])
   end
 
-  def set_form_dropdowns
+  def set_form_dropdowns # rubocop:disable Metrics/AbcSize
     @delivery_method_id = if params[:delivery_method_name].present?
       ContactMethod.where('LOWER(name) = ?', params[:delivery_method_name].downcase).last&.id
     else

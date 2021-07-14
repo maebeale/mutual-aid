@@ -3,7 +3,7 @@
 class LocationsController < AdminController
   before_action :set_location, only: %i[show edit update destroy]
 
-  def index
+  def index # rubocop:todo Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity, Metrics/AbcSize, Metrics/MethodLength
     @locations = Location.order(:state, :city, :region, :neighborhood, :street_address)
 
     # service_area filter

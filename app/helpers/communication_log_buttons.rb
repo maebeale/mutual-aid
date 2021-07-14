@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module CommunicationLogButtons
-  def remote_communication_log_button(
+module CommunicationLogButtons # rubocop:todo Metrics/ModuleLength
+  def remote_communication_log_button( # rubocop:todo Metrics/ParameterLists
     person,
     match: nil,
     needs_follow_up: false,
@@ -45,7 +45,14 @@ module CommunicationLogButtons
     end
   end
 
-  def log_autoemail_button(person, match: nil, subject: nil, body: nil, created_by: nil, needs_follow_up: false)
+  def log_autoemail_button( # rubocop:todo Metrics/ParameterLists
+    person,
+    match: nil,
+    subject: nil,
+    body: nil,
+    created_by: nil,
+    needs_follow_up: false
+  )
     remote_communication_log_button(person,
       match: match,
       needs_follow_up: needs_follow_up,
@@ -108,7 +115,14 @@ module CommunicationLogButtons
       created_by: created_by)
   end
 
-  def log_connection_button(person, match: nil, subject: nil, body: nil, created_by: nil, needs_follow_up: false)
+  def log_connection_button( # rubocop:todo Metrics/ParameterLists
+    person,
+    match: nil,
+    subject: nil,
+    body: nil,
+    created_by: nil,
+    needs_follow_up: false
+  )
     remote_communication_log_button(person,
       match: match,
       needs_follow_up: needs_follow_up,
@@ -121,7 +135,15 @@ module CommunicationLogButtons
       created_by: created_by)
   end
 
-  def new_communication_log_button(person, match: nil, subject: nil, body: nil, created_by: nil, needs_follow_up: true, contribution: nil)
+  def new_communication_log_button( # rubocop:todo Metrics/ParameterLists
+    person,
+    match: nil,
+    subject: nil,
+    body: nil,
+    created_by: nil,
+    needs_follow_up: true,
+    contribution: nil
+  )
     delivery_method = ContactMethod.where(name: 'Text').first_or_create!(field: 'phone', enabled: false)
     link_path = new_communication_log_path(
       contribution_id: contribution&.id,

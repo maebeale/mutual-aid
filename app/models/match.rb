@@ -61,7 +61,7 @@ class Match < ApplicationRecord
   end
 
   # TODO: move this to presenter
-  def person_names
+  def person_names # rubocop:todo Metrics/AbcSize
     receiver_name = [Listing, Ask, Offer].include?(receiver.class) ? receiver.person&.name : receiver.name if receiver
     provider_name = [Listing, Ask, Offer].include?(provider.class) ? provider.person&.name : provider.name if provider
     "#{receiver_name} -and- #{provider_name}" # TODO: need to adjust for community resource

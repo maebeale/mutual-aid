@@ -49,7 +49,7 @@ class ShiftMatchesController < AdminController
     @shift_match = ShiftMatch.find(params[:id])
   end
 
-  def set_form_dropdowns
+  def set_form_dropdowns # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
     @shifts = if action_name == 'new'
       Shift.active
     else

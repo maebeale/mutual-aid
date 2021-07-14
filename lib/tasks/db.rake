@@ -4,7 +4,7 @@ require 'csv'
 
 desc 'Extra db functions: stats_check, reset db with seeds, import csv and seed data'
 
-namespace :db do
+namespace :db do # rubocop:disable Metrics/BlockLength
   task rebuild_and_seed_dev: [
     'db:reset',
     'db:migrate',

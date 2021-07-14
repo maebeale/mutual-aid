@@ -21,7 +21,7 @@ class Importers::CustomFormQuestionImporter < Importers::BaseImporter
     CustomFormQuestion.i18n.where(name: value)
   end
 
-  def find_or_create_custom_form_question(row)
+  def find_or_create_custom_form_question(row) # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
     locale = row['locale'] || 'en' # rubocop:todo Lint/UselessAssignment
     form_type = row['form_type']
     input_type = row['input_type'] || 'string'

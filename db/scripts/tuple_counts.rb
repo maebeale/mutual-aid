@@ -11,7 +11,7 @@ def check_table_has_id_column(table_name, connection)
   !(result == 0)
 end
 
-def check_table_count(table_name, connection, class_name)
+def check_table_count(table_name, connection, class_name) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   # get count of records in table. set to count empty string if result == 0.
   sql = "select count(1) from #{table_name}"
   result = connection.execute(sql).values.flatten.join.to_i

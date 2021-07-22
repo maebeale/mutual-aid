@@ -22,4 +22,15 @@ RSpec.describe Offer do
       expect(Offer.matchable).to_not include matched_offer
     end
   end
+
+  describe 'create' do 
+    it 'sets an offer inexhaustable if there is a system setting for it' do
+      SystemSetting.any_instance.should_receive(:inexhaustable_by_default?).returns(true)
+
+      offer = Offer.create!
+      
+      expect(offer.inexhaustable).to eq(true)
+    end
+  end
+
 end

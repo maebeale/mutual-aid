@@ -1,7 +1,7 @@
 version: 2.1
 
 commands:
-  bundle_install:
+  bundle_install_cmd:
     description: 'Perform bundler installation, relying on CircleCI cache for performance'
     steps:
       - restore_cache:
@@ -10,14 +10,13 @@ commands:
       - run:
           name: 'Bundle install'
           command: |
-            set -euxo pipefail
             bundle config set frozen 'true'
             bundle install --path=.bundle
       - save_cache:
           key: bundler-cache-{{ checksum ".ruby-version" }}-{{ checksum "Gemfile.lock" }}
           paths:
             - .bundle
-  yarn_install:
+  yarn_install_cmd:
     description: 'Perform node module installation, relying on CircleCI cache for performance'
     steps:
       - restore_cache:
@@ -30,130 +29,139 @@ commands:
           key: node-cache-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
           paths:
             - node_modules
-  run_rubocop:
-    description: 'Run rubocop'
+  webpacker_compile_cmd:
     steps:
+      - run:
+          name: 'Generate file containing checksums of all our javascript source'
+          command: |
+            find app/javascript -type f -exec md5sum {} + | LC_ALL=C sort > tmp/app_javascript_checksums.txt
       - restore_cache:
           keys:
-            - bundler-cache-{{ checksum ".ruby-version" }}-{{ checksum "Gemfile.lock" }}
+            - webpacker-cache-{{ checksum "Gemfile.lock" }}-{{ checksum "yarn.lock" }}-{{ checksum "tmp/app_javascript_checksums.txt" }}
+      - run:
+          name: 'Compile webpacker assets'
+          command: |
+            bundle config path .bundle
+            bundle exec rails webpacker:compile
+      - save_cache:
+          key: webpacker-cache-{{ checksum "Gemfile.lock" }}-{{ checksum "yarn.lock" }}-{{ checksum "tmp/app_javascript_checksums.txt" }}
+          paths:
+            - public/packs-test
+            - tmp/cache/webpacker # should match the cache_path entry in config/webpacker.yml
+  rubocop_cmd:
+    description: 'Run rubocop'
+    steps:
       - run:
           name: 'Run rubocop'
           command: |
-            set -euxo pipefail
             bundle config path .bundle
             bundle exec rubocop
-  rspec_backend:
-    description: 'Run rspec backend specs'
+  rspec_cmd:
+    parameters:
+      specs:
+        type: string
+        default: spec
+      output:
+        type: string
+        default: /tmp/rspec/rspec.xml
     steps:
-      - restore_cache:
-          keys:
-            - bundler-cache-{{ checksum ".ruby-version" }}-{{ checksum "Gemfile.lock" }}
-      - restore_cache:
-          keys:
-            - node-cache-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
       - run:
-          name: 'Run rspec backend specs'
+          name: 'Run rspec'
           command: |
-            set -euxo pipefail
             bundle config path .bundle
             bundle exec rails db:create
-            bundle exec rspec --format progress --format RspecJunitFormatter -o /tmp/rspec_backend/rspec.xml
-  mocha_specs:
+            bundle exec rspec --format progress --format RspecJunitFormatter -o << parameters.output >> << parameters.specs >>
+  mocha_cmd:
     description: 'Run mocha specs'
+    parameters:
+      output:
+        type: string
+        default: /tmp/mocha/mocha.xml
     steps:
-      - restore_cache:
-          keys:
-            - node-cache-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
       - run:
           name: 'Run mocha specs'
           command: yarn test --reporter mocha-junit-reporter
           environment:
-            MOCHA_FILE: /tmp/frontend/test-results.xml
-  rspec_system:
-    description: 'Run rspec system specs'
-    steps:
-      - restore_cache:
-          keys:
-            - bundler-cache-{{ checksum ".ruby-version" }}-{{ checksum "Gemfile.lock" }}
-      - restore_cache:
-          keys:
-            - node-cache-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
-      - run:
-          name: 'Run rspec system specs'
-          command: |
-            set -euxo pipefail
-            bundle config path .bundle
-            bundle exec rails db:create
-            bundle exec rails webpacker:compile
-            bundle exec rspec --format progress --format RspecJunitFormatter -o /tmp/rspec_system/rspec.xml spec/system
+            MOCHA_FILE: << parameters.output >>
 
-app_image: &app_image
-  image: circleci/ruby:2.7.2-node-browsers
-db_image: &db_image
-  image: circleci/postgres:latest
+executors:
+  app_only:
+    shell: /bin/bash -euxo pipefail
+    docker:
+      - image: circleci/ruby:2.7.2-node
+  app_and_db:
+    shell: /bin/bash -euxo pipefail
+    docker:
+      - image: circleci/ruby:2.7.2-node-browsers
+        environment:
+          POSTGRES_HOST: 127.0.0.1
+          RAILS_ENV: test
+      - image: circleci/postgres:latest
+        environment:
+          POSTGRES_DB: mutualaid_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_USER: circleci
 
 jobs:
   bundle:
-    docker:
-      - <<: *app_image
+    executor: app_only
     steps:
       - checkout
-      - bundle_install
+      - bundle_install_cmd
+      - persist_to_workspace:
+          root: .
+          paths: [.bundle]
   yarn:
-    docker:
-      - <<: *app_image
+    executor: app_only
     steps:
       - checkout
-      - yarn_install
+      - yarn_install_cmd
+      - persist_to_workspace:
+          root: .
+          paths: [node_modules]
+  webpacker:
+    executor: app_only
+    environment:
+      RAILS_ENV: test
+    steps:
+      - checkout
+      - attach_workspace: {at: .}
+      - webpacker_compile_cmd
+      - persist_to_workspace:
+          root: .
+          paths: [public/packs-test]
   rubocop:
-    docker:
-      - <<: *app_image
+    executor: app_only
     steps:
       - checkout
-      - run_rubocop
+      - attach_workspace: {at: .}
+      - rubocop_cmd
   backend_specs:
-    docker:
-      - <<: *app_image
-        environment:
-          RAILS_ENV: test
-          POSTGRES_HOST: 127.0.0.1
-      - <<: *db_image
-        environment:
-          POSTGRES_USER: circleci
-          POSTGRES_DB: mutualaid_test
-          POSTGRES_HOST_AUTH_METHOD: trust
+    executor: app_and_db
     steps:
       - checkout
-      - rspec_backend
-      - store_test_results:
-          path: /tmp/rspec_backend
+      - attach_workspace: {at: .}
+      - rspec_cmd: {output: /tmp/rspec_backend/rspec.xml}
+      - store_test_results: {path: /tmp/rspec_backend}
   frontend_specs:
-    docker:
-      - <<: *app_image
+    executor: app_only
     steps:
       - checkout
-      - mocha_specs
-      - store_test_results:
-          path: /tmp/frontend
-      - store_artifacts:
-          path: /tmp/frontend
+      - attach_workspace: {at: .}
+      - mocha_cmd: {output: /tmp/mocha/mocha.xml}
+      - store_test_results: {path: /tmp/mocha}
+      - store_artifacts: {path: /tmp/mocha}
   system_specs:
-    docker:
-      - <<: *app_image
-        environment:
-          RAILS_ENV: test
-          POSTGRES_HOST: 127.0.0.1
-          HEADLESS_CHROME: true
-      - <<: *db_image
-        environment:
-          POSTGRES_USER: circleci
-          POSTGRES_DB: mutualaid_test
-          POSTGRES_HOST_AUTH_METHOD: trust
+    executor: app_and_db
+    environment:
+      HEADLESS_CHROME: true
     steps:
       - checkout
-      - rspec_system
-      - store_test_results:
-          path: /tmp/rspec_system
+      - attach_workspace: {at: .}
+      - rspec_cmd:
+          specs: spec/system
+          output: /tmp/rspec_system/rspec.xml
+      - store_test_results: {path: /tmp/rspec_system}
 
 workflows:
   version: 2.1
@@ -171,7 +179,12 @@ workflows:
       - frontend_specs:
           requires:
             - yarn
+      - webpacker:
+          requires:
+            - bundle
+            - yarn
       - system_specs:
           requires:
             - bundle
             - yarn
+            - webpacker

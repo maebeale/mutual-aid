@@ -37,7 +37,6 @@ import ListBrowser from './browse/ListBrowser'
 import TileBrowser from './browse/TileBrowser'
 import MapBrowser from './browse/MapBrowser'
 import ContributionFetcher from './browse/ContributionFetcher'
-
 export default {
   components: {
     BrowserSelector,

@@ -3,19 +3,19 @@ import {configure} from 'vue_config'
 import NavBar from 'components/NavBar'
 
 describe('NavBar', () => {
-  def('wrapper', () => mount(NavBar, {
-    localVue: configure(createLocalVue()),
-    propsData: {
-      logoUrl: '/some-url',
-      visibleButtons: $visibleButtons,
-    },
-  }))
+  def('wrapper', () =>
+    mount(NavBar, {
+      localVue: configure(createLocalVue()),
+      propsData: {
+        logoUrl: '/some-url',
+        visibleButtons: $visibleButtons,
+      },
+    })
+  )
 
   def('renderedNavItems', () => {
-    const navLinks = $wrapper.findAll('a.navbar-item').wrappers
-    const navButtons = $wrapper.findAll('.navbar-item a').wrappers
-    const navForms = $wrapper.findAll('.navbar-item form').wrappers
-    return [...navLinks, ...navButtons, ...navForms].map(link => link.text())
+    const navLinks = $wrapper.findAll('a:not(.burger)').wrappers
+    return [...navLinks].map((link) => link.text())
   })
 
   describe('visible buttons', () => {
@@ -49,7 +49,8 @@ describe('NavBar', () => {
     })
 
     describe('when instructed to show all admin buttons', () => {
-      def('visibleButtons', ['Contributions', 'Matches', 'Admin', 'Feedback', 'Logout'])
+      def('visibleButtons', ['Contributions', 'Matches', 'Admin', 'Account', 'Feedback', 'Logout'])
+
       it('includes specified buttons', () => {
         assert.sameMembers($renderedNavItems, [
           '',
@@ -59,6 +60,8 @@ describe('NavBar', () => {
           'Contributions',
           'Matches',
           'Admin',
+          'Account',
+          'My profile',
           'Feedback',
           'Logout',
         ])
@@ -66,4 +69,3 @@ describe('NavBar', () => {
     })
   })
 })
-

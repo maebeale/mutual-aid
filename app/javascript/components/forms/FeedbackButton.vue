@@ -1,11 +1,17 @@
 <template>
-  <a :href="url" class="button is-outlined">
+  <a :href="url" :class="classes">
     Feedback
   </a>
 </template>
 
 <script>
 export default {
+  props: {
+    classes: {
+      default: 'button is-outlined',
+      type: String,
+    },
+  },
   computed: {
     url() {
       const pathname = window.location.pathname

@@ -32,7 +32,7 @@
           <div v-if="service_area" class="has-text-grey-lighter">
             {{ service_area.name }}
           </div>
-          <div v-if="person.name" class="contributor-name">
+          <div v-if="person && person.name" class="contributor-name">
             {{ `From: ${person.name}` }}
           </div>
         </div>

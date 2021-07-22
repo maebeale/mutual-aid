@@ -8,6 +8,6 @@ class ServiceAreaFilter < BaseFilter
 
   def filter(scope)
     return super unless parameters
-    scope.where(service_area_id: parameters.keys)
+    scope.in_service_areas(parameters.keys)
   end
 end

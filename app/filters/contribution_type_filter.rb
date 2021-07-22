@@ -2,10 +2,11 @@ class ContributionTypeFilter < BaseFilter
   def self.filter_grouping
     {name: 'Contribution Types', filter_options: [
       {id: 'ContributionType[Ask]', name: 'Ask'},
-      {id: 'ContributionType[Offer]', name: 'Offer'}
+      {id: 'ContributionType[Offer]', name: 'Offer'},
+      {id: 'ContributionType[CommunityResource]', name: 'Community Resource'}
     ]}
   end
-  ALL_ALLOWED_TYPES = ['Ask', 'Offer'].freeze
+  ALL_ALLOWED_TYPES = %w[Ask Offer CommunityResource].freeze
 
   def filter(scope)
     raise NotImplementedError.new(

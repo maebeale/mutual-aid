@@ -6,6 +6,7 @@ class Ask < Listing
   scope :matched,   -> { includes(:matches_as_receiver).references(:matches_as_receiver).where.not(matches: {provider_id: nil}) }
   scope :unmatched, -> { includes(:matches_as_receiver).references(:matches_as_receiver).where(matches: {provider_id: nil}) }
   scope :matchable, -> { where(id: unmatched.pluck(:id) + inexhaustible.pluck(:id)) }
+  scope :in_service_areas, ->(ids) { where(service_area_id: ids) }
 end
 
 # == Schema Information

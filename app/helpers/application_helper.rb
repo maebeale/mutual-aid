@@ -90,4 +90,9 @@ module ApplicationHelper
     # There should always be a current org, but being defensive here helps simplify tests
     context.host_organization&.logo_url.presence || asset_pack_path('media/images/logo.png')
   end
+
+  def present object, presenter_class
+    presenter = presenter_class.new object, self
+    block_given? ? yield(presenter) : presenter
+  end
 end

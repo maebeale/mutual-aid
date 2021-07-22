@@ -1,4 +1,4 @@
-class AnnouncementPresenter < SimpleDelegator
+class AnnouncementPresenter < BasePresenter
   def expires_on
     return "This announcement does not expire." unless publish_until
 

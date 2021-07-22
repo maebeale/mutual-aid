@@ -1,9 +1,11 @@
-<% announcement_presenter = AnnouncementPresenter.new(announcement) %>
+<% present(announcement, AnnouncementPresenter) do |announcement| %>
+
 <p id="notice"><%= notice %></p>
+
 <div class="card">
   <header class="card-header">
     <p class="card-header-title title is-3">
-      <%= announcement_presenter.name %>
+      <%= announcement.name %>
       <% if policy(announcement).change? %>
         <%= link_to 'Edit', edit_announcement_path(announcement), class: "button is-primary ml-1" %>
       <% end %>
@@ -12,11 +14,11 @@
   <div class="card-content">
     <div class="content">
       <p>
-        <%= announcement_presenter.description %>
+        <%= announcement.description %>
       </p>
 
       <p>
-        <small><em><%= announcement_presenter.expires_on %></em></small>
+        <small><em><%= announcement.expires_on %></em></small>
       </p>
     </div>
   </div>
@@ -24,3 +26,5 @@
     <%= link_to 'Back', announcements_path, class: "button is-info ml-1 mt-1 mb-1" %>
   </div>
 </div>
+
+<% end %>

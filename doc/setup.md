@@ -156,7 +156,7 @@ And in a separate terminal:
 $ bin/webpack-dev-server
 ```
 
-You should now be able to see the app running at http://localhost:3000
+You should now be able to see the app running at http://localhost:3000 (or whichever port the rails server is running on).
 
 
 ## Running tests
